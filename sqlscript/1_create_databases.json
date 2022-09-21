@@ -1,0 +1,20 @@
+{
+	"name": "1_create_databases",
+	"properties": {
+		"folder": {
+			"name": "ny_taxi/Idw"
+		},
+		"content": {
+			"query": "USE master\nGO\n\nCREATE DATABASE nyt_ldw\nGO\n\nALTER DATABASE nyt_ldw COLLATE Latin1_General_100_BIN2_UTF8\nGO\n\nUSE nyt_ldw\nGO\n\nCREATE SCHEMA bronze\nGO\n\nCREATE SCHEMA silver\nGO\n\nCREATE SCHEMA gold\nGO",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyt_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

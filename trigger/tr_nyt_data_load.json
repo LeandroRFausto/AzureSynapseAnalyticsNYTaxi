@@ -1,0 +1,25 @@
+{
+	"name": "tr_nyt_data_load",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pl_execute_all_pipelines",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 5,
+				"startTime": "2022-09-15T10:40:00",
+				"endTime": "2022-09-16T10:40:00",
+				"timeZone": "E. South America Standard Time"
+			}
+		}
+	}
+}

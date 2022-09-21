@@ -1,0 +1,20 @@
+{
+	"name": "query_cosmos",
+	"properties": {
+		"folder": {
+			"name": "ny_taxi/cosmos"
+		},
+		"content": {
+			"query": "IF (NOT EXISTS(SELECT * FROM sys.credentials WHERE name = 'synapse-nyt-cosmos-db'))\n    THROW 50000, 'As a prerequisite, create a credential with Azure Cosmos DB key in SECRET option:\n    CREATE CREDENTIAL [synapse-nyt-cosmos-db]\n    WITH IDENTITY = ''SHARED ACCESS SIGNATURE'', SECRET = ''<Enter your Azure Cosmos DB key here>''', 0\nGO\n\nSELECT TOP 100 *\nFROM OPENROWSET(​PROVIDER = 'CosmosDB',\n                CONNECTION = 'Account=synapse-nyt-cosmos-db;Database=nytdb',\n                OBJECT = 'Heartbeat',\n                SERVER_CREDENTIAL = 'synapse-nyt-cosmos-db'\n) AS [Heartbeat]\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

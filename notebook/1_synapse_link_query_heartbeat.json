@@ -1,0 +1,58 @@
+{
+	"name": "1_synapse_link_query_heartbeat",
+	"properties": {
+		"folder": {
+			"name": "synapse_link"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "638914d0-ee94-4746-b73f-955543b8edeb"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"# Lê dados do repositório analítico do Cosmos DB em um Spark DataFrame e exiba 10 linhas do DataFrame\n",
+					"# Para selecionar uma lista preferencial de regiões em uma conta Cosmos DB multirregional, adicione .option(\"spark.cosmos.preferredRegions\", \"<Region1>,<Region2>\")\n",
+					"\n",
+					"df = spark.read\\\n",
+					"    .format(\"cosmos.olap\")\\\n",
+					"    .option(\"spark.synapse.linkedService\", \"ls_cosmos_db_nyt_data\")\\\n",
+					"    .option(\"spark.cosmos.container\", \"Heartbeat\")\\\n",
+					"    .load()\n",
+					"\n",
+					"display(df.limit(10))"
+				],
+				"attachments": null,
+				"execution_count": null
+			}
+		]
+	}
+}

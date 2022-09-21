@@ -1,0 +1,20 @@
+{
+	"name": "2_create_external_data_sources",
+	"properties": {
+		"folder": {
+			"name": "ny_taxi/Idw"
+		},
+		"content": {
+			"query": "USE nyt_ldw;\n\nIF NOT EXISTS(SELECT * FROM sys.external_data_sources WHERE name = 'nyt_src')\n    CREATE EXTERNAL DATA SOURCE nyt_src\n    WITH\n    (    LOCATION         = 'https://synapsenytdl.dfs.core.windows.net/nyt-data'\n    );",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyt_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

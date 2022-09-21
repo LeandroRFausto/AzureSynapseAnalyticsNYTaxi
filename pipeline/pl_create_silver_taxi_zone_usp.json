@@ -1,0 +1,65 @@
+{
+	"name": "pl_create_silver_taxi_zone_usp",
+	"properties": {
+		"activities": [
+			{
+				"name": "Delete Silver Taxi Zone Folder",
+				"type": "Delete",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "ds_silver_taxi_zone",
+						"type": "DatasetReference"
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			},
+			{
+				"name": "Create Silver Taxi Zone_copy1",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Delete Silver Taxi Zone Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[silver].[usp_silver_taxi_zone]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_serverless_sql_pool_db_nyt_ldw",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "demo"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-09-15T12:59:00Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

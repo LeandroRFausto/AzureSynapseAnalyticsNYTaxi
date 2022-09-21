@@ -1,0 +1,20 @@
+{
+	"name": "13_simple_transformation",
+	"properties": {
+		"folder": {
+			"name": "ny_taxi/discovery"
+		},
+		"content": {
+			"query": "USE nyc_taxi_discovery\n\n/*\nViagens por duração em horas\n1. Seleciono o horário de início e fim da viagem\n2. utilizo a função DATEDIFF baseada em minutos para hora de início e fim\n3. uso agregação para encontrar o número de viagens por durações\n4. há duas viagens com duração negativa que deverão ser desconsideradas\n*/\n\nSELECT TOP 100\n    lpep_pickup_datetime,\n    lpep_dropoff_datetime,\n    DATEDIFF(minute, lpep_pickup_datetime, lpep_dropoff_datetime) / 60 AS from_hour,\n    (DATEDIFF(minute, lpep_pickup_datetime, lpep_dropoff_datetime) / 60) +1 AS to_hour\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/**',\n        FORMAT = 'PARQUET',\n        DATA_SOURCE = 'nyt_data_raw'\n    ) AS trip_data;\n\nSELECT \n    DATEDIFF(minute, lpep_pickup_datetime, lpep_dropoff_datetime) / 60 AS from_hour,\n    (DATEDIFF(minute, lpep_pickup_datetime, lpep_dropoff_datetime) / 60) + 1 AS to_hour,\n    COUNT(1) AS number_of_trips\nFROM\n    OPENROWSET(\n        BULK 'trip_data_green_parquet/**',\n        FORMAT = 'PARQUET',\n        DATA_SOURCE = 'nyt_data_raw'\n    ) AS trip_data\nGROUP BY DATEDIFF(minute, lpep_pickup_datetime, lpep_dropoff_datetime) / 60, \n(DATEDIFF(minute, lpep_pickup_datetime, lpep_dropoff_datetime) / 60) + 1\nORDER BY from_hour, to_hour;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

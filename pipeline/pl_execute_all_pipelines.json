@@ -1,0 +1,62 @@
+{
+	"name": "pl_execute_all_pipelines",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute Create Silver Tables",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_create_silver_tables",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute Create Silver Tip Data Green",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_create_silver_trip_data_green",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute Create Gold Tip Data Green",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Create Silver Tables",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Execute Create Silver Tip Data Green",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_create_gold_trip_data_green",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2022-09-15T13:23:12Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

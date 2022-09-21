@@ -1,0 +1,241 @@
+{
+	"name": "1_spark_create_gold_trip_data_green_agg",
+	"properties": {
+		"folder": {
+			"name": "agg"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "466a56c2-fe20-4d27-a27d-e10ccfa8c5a0"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"application/vnd.databricks.v1+cell": {
+						"title": "",
+						"showTitle": false,
+						"nuid": "b3f73f32-cc35-4af6-8630-137ab600b509"
+					}
+				},
+				"source": [
+					"## Trip Data Aggregation \n",
+					"### Group By Columns\n",
+					"1. year\n",
+					"2. Month\n",
+					"3. Pickup Location ID\n",
+					"4. Drop Off Location ID\n",
+					"\n",
+					"### Aggregated Columns\n",
+					"1. Total Trip Count\n",
+					"2. Total Fare Amount\n",
+					"\n",
+					"### Purpose of the notebook\n",
+					"\n",
+					"Demonstrate the integration between Spark Pool and Serverless SQL Pool\n",
+					"\n",
+					"1. Create the aggregated table in Spark Pool\n",
+					"2. Access the data from Serverless SQL Pool"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"application/vnd.databricks.v1+cell": {
+						"title": "",
+						"showTitle": false,
+						"nuid": "9a1314b6-47b3-4b29-a472-1b6481720e26"
+					}
+				},
+				"source": [
+					"# Define os caminhos da pasta para que possa ser usado mais tarder. \n",
+					"bronze_folder_path = 'abfss://nyt-data@synapsenytdl.dfs.core.windows.net/raw'\n",
+					"silver_folder_path = 'abfss://nyt-data@synapsenytdl.dfs.core.windows.net/silver'\n",
+					"gold_folder_path = 'abfss://nyt-data@synapsenytdl.dfs.core.windows.net/gold'"
+				],
+				"attachments": null,
+				"execution_count": 0
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"application/vnd.databricks.v1+cell": {
+						"title": "",
+						"showTitle": false,
+						"nuid": "155a671c-2ba9-4a81-8821-ca4805a292d7"
+					}
+				},
+				"source": [
+					"# Define a configuração do spark para poder obter as colunas particionadas ano e mês como strings em vez de inteiros\n",
+					"spark.conf.set(\"spark.sql.sources.partitionColumnTypeInference.enabled\", \"false\")"
+				],
+				"attachments": null,
+				"execution_count": 0
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"application/vnd.databricks.v1+cell": {
+						"title": "",
+						"showTitle": false,
+						"nuid": "847a59aa-abc4-4765-8926-8c79a0470891"
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%sql\n",
+					"\n",
+					"-- Cria banco de dados no qual vamos gravar os dados\n",
+					"\n",
+					"CREATE DATABASE IF NOT EXISTS nyc_taxi_ldw_spark\n",
+					"LOCATION 'nyt-data@synapsenytdl.dfs.core.windows.net/gold';"
+				],
+				"attachments": null,
+				"execution_count": 0
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"application/vnd.databricks.v1+cell": {
+						"title": "",
+						"showTitle": false,
+						"nuid": "0906ed78-3489-4381-9c29-f644525329ed"
+					}
+				},
+				"source": [
+					"# Lê os dados de prata a serem processados. \n",
+					"trip_data_green_df = spark.read.parquet(f\"{silver_folder_path}/trip_data_green\") "
+				],
+				"attachments": null,
+				"execution_count": 0
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"application/vnd.databricks.v1+cell": {
+						"title": "",
+						"showTitle": false,
+						"nuid": "30b9d0f9-4a58-43bc-a662-da1f930b3a7a"
+					}
+				},
+				"source": [
+					"# Executa as agregações necessárias\n",
+					"# 1. Conta o total de viagens\n",
+					"# 2. Mostra o valor total da tarifa\n",
+					"from pyspark.sql.functions import *\n",
+					"\n",
+					"trip_data_green_agg_df = trip_data_green_df \\\n",
+					"                        .groupBy(\"year\", \"month\", \"pu_location_id\", \"do_location_id\") \\\n",
+					"                        .agg(count(lit(1)).alias(\"total_trip_count\"),\n",
+					"                        round(sum(\"fare_amount\"), 2).alias(\"total_fare_amount\"))"
+				],
+				"attachments": null,
+				"execution_count": 0
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"application/vnd.databricks.v1+cell": {
+						"title": "",
+						"showTitle": false,
+						"nuid": "17b8a45e-e070-4403-881d-ee77b7d92188"
+					}
+				},
+				"source": [
+					"# Grava os dados agregados na tabela de ouro para consumo\n",
+					"\n",
+					"trip_data_green_agg_df.write.mode(\"overwrite\").partitionBy(\"year\", \"month\").format(\"parquet\").saveAsTable(\"nyc_taxi_ldw_spark.trip_data_green_agg\")"
+				],
+				"attachments": null,
+				"execution_count": 0
+			}
+		]
+	}
+}

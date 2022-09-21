@@ -1,0 +1,20 @@
+{
+	"name": "10_check_for_duplicates",
+	"properties": {
+		"folder": {
+			"name": "ny_taxi/discovery"
+		},
+		"content": {
+			"query": "USE nyc_taxi_discovery\n\n/* Checando duplicatas no \"taxi zone\"\n1. Identifica a chave primária, no caso o ID de localização\n2. Verifica se há mais de um registro usando o \"having\"\n*/\nSELECT\n    location_id,\n    COUNT(1) AS number_of_records\nFROM\n    OPENROWSET(\n        BULK 'abfss://nyt-data@synapsenytdl.dfs.core.windows.net/raw/taxi_zone.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        FIRSTROW = 2,\n        FIELDTERMINATOR = ',',\n        ROWTERMINATOR = '\\n'\n    ) \n    WITH (\n        location_id SMALLINT 1,\n        borough VARCHAR(15) 2,\n        zone VARCHAR(50) 3,\n        service_zone VARCHAR(15) 4\n    )AS [result]\n    GROUP BY location_id\n    HAVING COUNT(1) > 1;\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "nyc_taxi_discovery",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

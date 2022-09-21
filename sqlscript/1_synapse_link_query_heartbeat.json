@@ -1,0 +1,20 @@
+{
+	"name": "1_synapse_link_query_heartbeat",
+	"properties": {
+		"folder": {
+			"name": "ny_taxi/synapse_link"
+		},
+		"content": {
+			"query": "IF (NOT EXISTS(SELECT * FROM sys.credentials WHERE name = 'synapse-nyt-cosmos-db'))\n    CREATE CREDENTIAL [synapse-nyt-cosmos-db]\n    WITH IDENTITY = 'SHARED ACCESS SIGNATURE', SECRET = 'MU8FbAMlpQ0PL7efJ4MlWLDOcSYJsiUdtB70eVS8uybpSGkKXiRetg1AGA7pKuarh7S1fM8p27KdcUeGuOU1fQ=='\nGO\n\nSELECT TOP 100 *\nFROM OPENROWSET(​PROVIDER = 'CosmosDB',\n                CONNECTION = 'Account=synapse-nyt-cosmos-db;Database=nytdb',\n                OBJECT = 'Heartbeat',\n                SERVER_CREDENTIAL = 'synapse-nyt-cosmos-db'\n) AS [Heartbeat]\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
