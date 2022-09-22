@@ -1,6 +1,6 @@
 # AzureSynapseAnalyticsNYTaxi
 
-<p>Implementa uma solução de Engenharia de dados para análise e geração de relatórios sobre dados de viagens dos táxis de Nova York. O projeto utiliza exclusivamente a Azure e o Synapse Analytics como principal componente. Os dados são fornecidos pela NYC Taxi & Limousine Commission, que grava os históricos das viagens. O estudo também simula uma campanha de incentivo ao uso de cartões de crédito, que será mostrada em um relatório de Power BI.
+<p>Implementa uma solução de Engenharia de dados para análise e geração de relatórios das viagens dos táxis de Nova York. O projeto utiliza exclusivamente a Azure e o Synapse Analytics como principal componente. Os dados são fornecidos pela NYC Taxi & Limousine Commission, que grava os históricos das viagens. O estudo também simula uma campanha de incentivo ao uso de cartões de crédito, que será mostrada em um relatório de Power BI.
 As transformações, conversões e incrementos são feitos basicamente em scripts SQL dentro do Synapse Analytics conectados ao motor Serverless do recurso. Um pool SQL dedicado e o Spark pool também foram utilizados para agregações e geração de tabela externa para staging.
 O Synapse Analytics também é responsável pela orquestração, automatização e monitoramento dos pipelines do projeto.
 <p align="center">
