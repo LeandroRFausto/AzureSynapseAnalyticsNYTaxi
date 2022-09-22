@@ -1,18 +1,17 @@
 # AzureSynapseAnalyticsNYTaxi
 
-<p>Implementa uma solução de Engenharia de dados para análise e geração de relatórios sobre dados de viagens dos táxis de Nova York. O projeto utiliza exclusivamente a Azure, o Synapse Analytics como principal componente com ênfase em SQL. Os dados são fornecidos pela NYC Taxi & Limousine Commission, que grava os históricos das viagens. O estudo também simula uma campanha de incentivo ao uso de cartões de crédito, que será mostrada em um relatório de Power BI.
+<p>Implementa uma solução de Engenharia de dados para análise e geração de relatórios sobre dados de viagens dos táxis de Nova York. O projeto utiliza exclusivamente a Azure e o Synapse Analytics como principal componente. Os dados são fornecidos pela NYC Taxi & Limousine Commission, que grava os históricos das viagens. O estudo também simula uma campanha de incentivo ao uso de cartões de crédito, que será mostrada em um relatório de Power BI.
 As transformações, conversões e incrementos são feitos basicamente em scripts SQL dentro do Synapse Analytics conectados ao motor Serverless do recurso. Um pool SQL dedicado e o Spark pool também foram utilizados para agregações e geração de tabela externa para staging.
 O Synapse Analytics também é responsável pela orquestração, automatização e monitoramento dos pipelines do projeto.
+<p align="center">
+<img src="https://github.com/LeandroRFausto/AzureSynapseAnalyticsNYTaxi/blob/main/nyt/prints/warehouse.png"/>
+</p>
 Houve também integração com o Cosmos DB utilizando Synapse Link para simular um sistema que hospeda dados de evento, como um gerenciador de corridas.<p>
 Arquivos utilizados em diversos formatos, conforme distribuição a seguir: TRIP DATA (Parquet, Delta e CSV); TAXI ZONE e CALENDAR (CSV); TRIP TYPE (TSV); RATE CODE e PAYMENT TYPE (JSON); VENDOR (CSV e Quoted).
 
-## Arquitetura e componentes do projeto
+## Arquitetura
 <p align="center">
 <img src="https://github.com/LeandroRFausto/AzureSynapseAnalyticsNYTaxi/blob/main/nyt/prints/arq.png"/>
-</p>
-
-<p align="center">
-<img src="https://github.com/LeandroRFausto/AzureSynapseAnalyticsNYTaxi/blob/main/nyt/prints/warehouse.png"/>
 </p>
 
 ## Recursos utilizados no Azure:
@@ -37,13 +36,14 @@ Arquivos utilizados em diversos formatos, conforme distribuição a seguir: TRIP
 
 ## Estrutura e construção do projeto
 O contêiner foi criado manualmente utilizando o Microsoft Azure Storage Explorer. Como não haverá manutenção dos arquivos, eles foram inseridos também manualmente numa pasta denominada “raw”. 
-Se criado no mesmo grupo de recursos, ao entrar no Synapse Studio/Data/Linked será possível avistar o data lake e a pasta “raw” criada. Dentro dela todos os arquivos que serão utilizados. Com um clique no botão direito do mouse é possível criar um novo script SQL. Os dados são obtidos através do OPENROWSET usando o pool de SQL sem servidor. A função permite que você acesse arquivos no armazenamento do Azure e leia o conteúdo de uma fonte de dados remota. Dessa forma é criada uma estrutura de dados em SQL conforme a seguir.
+Se criado no mesmo grupo de recursos, ao entrar no Synapse Studio/Data/Linked será possível avistar o data lake e a pasta “raw” criada. Dentro dela todos os arquivos que serão utilizados. Com um clique no botão direito do mouse é possível criar um novo script SQL. Os dados são obtidos através do OPENROWSET usando o pool de SQL sem servidor. A função permite acessar arquivos no armazenamento do Azure e ler o conteúdo de uma fonte de dados remota. Dessa forma é criada uma estrutura de dados em SQL conforme a seguir.
 
 ### Estrutura
-Os arquivos em si possuem uma estrutura imprópria, que prejudicam o desempenho, sendo necessário fazer alterações de nomenclatura e formatos. Por isso, cada um deles terá seu correspondente em SQL. Todas as anotações de alteração se encontram no projeto. São criadas também base de dados, de diferentes momentos do projeto. A “nyc_taxi_discovery” contempla o correspondente dos sete arquivos, suas variações se formato e outros arquivos que verificam duplicatas, a qualidade dos dados, joins (para obter conclusões que não são possíveis com arquivos isolados), transformações (que também verificam qualidade dos dados) e descobertas. Tudo é colocado na pasta Discovery.
+Os arquivos em si possuem uma estrutura imprópria, que prejudicam o desempenho, sendo necessário fazer alterações de nomenclatura e formatos. Por isso, cada um deles terá seu correspondente em SQL. Todas as anotações de alteração se encontram no projeto. São criadas também base de dados de diferentes momentos do projeto. A “nyc_taxi_discovery” contempla o correspondente dos sete arquivos, suas variações de formato e outros arquivos que verificam duplicatas, a qualidade dos dados, joins (para obter conclusões que não são possíveis com arquivos isolados), transformações (que também verificam qualidade dos dados) e descobertas. Tudo é colocado na pasta Discovery.
 
 ### Camada Relacional (LDW)
 Uma outra pasta, de nome ldw, também tem sua própria base de dados. Aqui a ênfase está nas tabelas externas. Uma tabela externa aponta para dados localizados no Azure Storage Blobs ou Azure Data Lake Storage. Para importar dados de tabelas externas para pools de SQL dedicados é utilizada a instrução CREATE TABLE AS SELECT (CETAS). 
+
 Os arquivos têm as seguintes funções:
 * create_databases – responsável pela criação da base de dados, sua configuração e esquemas.
 * create_external_data_sources – para a criação de tabelas externas é necessário criar recursos externos, função deste arquivo.
@@ -59,8 +59,8 @@ Os arquivos têm as seguintes funções:
 Como cada arquivo possui procedimentos repetitivos, uma solução interessante é o stored procedures (procedimentos armazenados), um conjunto de comandos em SQL que podem ser executados de uma só vez, como em uma função. Ele armazena tarefas repetitivas e aceita parâmetros de entrada para que a tarefa seja efetuada de acordo com a necessidade individual. São construídos arquivos de origem da pasta “silver” com essas funções.
 
 ### Staging
-É uma tabela temporária que guarda todos os dados que serão usados para fazer alterações na tabela de destino, incluindo atualizações e inserções, otimizando o desempenho. Ela é distribuída em Round Robin, ideal para este tipo de prática. Para pools de SQL sem servidor, usamos (CTAS) para salvar o resultado da consulta em uma tabela externa no Armazenamento do Microsoft Azure. Conforme o caso. A base de dados “nyt_dwh” tem a tabela staging, 
-O motor utilizado nesta tabela é diferente do anterior. Até o momento apenas o Serverless SQL pool tinha sido utilizado, porém desta vez é utilizado o Dedicated SQL pool. Um pool dedicado de local físico, sendo assim, só poderemos ter acesso a esta tabela se o pool estiver ligado, conforme abaixo. 
+É uma tabela temporária que guarda todos os dados que serão usados para fazer alterações na tabela de destino, incluindo atualizações e inserções, otimizando o desempenho. Ela é distribuída em Round Robin, ideal para este tipo de prática. Para pools de SQL sem servidor, usamos (CTAS) para salvar o resultado da consulta em uma tabela externa no Armazenamento do Microsoft Azure. Conforme o caso. A base de dados “nyt_dwh” tem a tabela staging.
+O motor utilizado nesta tabela é diferente do anterior. Até o momento apenas o Serverless SQL pool tinha sido usado, porém desta vez é utilizado o Dedicated SQL pool. Um pool dedicado de local físico, sendo assim, só poderemos ter acesso a esta tabela se o pool estiver ligado, conforme abaixo. 
 
 <p align="center">
 <img src="https://github.com/LeandroRFausto/AzureSynapseAnalyticsNYTaxi/blob/main/nyt/prints/dedicatedpool_round_robin.png"/>
@@ -68,7 +68,7 @@ O motor utilizado nesta tabela é diferente do anterior. Até o momento apenas o
 Para utilizar, é necessário cria-lo no workspace do Synapse.
 
 ### Synapse Link e Cosmos DB
-O Synapse Analytics tem conexão direta com o Cosmos DB através do Synapse Link. No projeto, simulamos que todos os veículos possuíam dispositivos que enviavam informações ao Cosmos DB. O Cosmos enviava esses dados diretamente para o Synapse Analytics, onde podemos fazer consultas em tempo real, como no print abaixo.
+O Synapse Analytics tem conexão direta com o Cosmos DB através do Synapse Link. No projeto, foi simulado que todos os veículos possuíam dispositivos que enviavam informações ao Cosmos DB. O Cosmos mandava esses dados diretamente para o Synapse Analytics, onde se pode fazer consultas em tempo real, como no print abaixo.
 <p align="center">
 <img src="https://github.com/LeandroRFausto/AzureSynapseAnalyticsNYTaxi/blob/main/nyt/prints/query_cosmos.png"/>
 </p>
